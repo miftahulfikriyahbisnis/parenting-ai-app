@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
-    page_title="SmartParenting AI",
+    page_title="Bunda AI - Cerdas & Hangat",
     page_icon="🌸",
     layout="centered"
 )
@@ -11,92 +11,139 @@ st.set_page_config(
 # --- 2. STYLE CSS (Tampilan Cantik & Friendly) ---
 st.markdown("""
     <style>
-    .main { background-color: #fff5f7; }
+    .stApp {
+        background-color: #fffafb;
+    }
+    .main {
+        padding: 2rem;
+    }
     .stButton>button {
         background-color: #ff85a2;
         color: white;
-        border-radius: 20px;
+        border-radius: 25px;
         border: none;
-        padding: 10px 25px;
+        padding: 0.6rem 2rem;
         font-weight: bold;
+        width: 100%;
     }
-    .stTextInput>div>div>input { border-radius: 15px; }
-    h1 { color: #d63384; font-family: 'sans-serif'; }
-    h3 { color: #d63384; }
+    .stButton>button:hover {
+        background-color: #ef7091;
+        border: none;
+    }
+    h1 {
+        color: #d63384;
+        text-align: center;
+    }
+    .stTextInput>div>div>input, .stTextArea>div>textarea {
+        border-radius: 15px;
+        border: 1px solid #ffc1d1;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. KONEKSI API & SYSTEM INSTRUCTION ---
+# --- 3. KONEKSI & INISIALISASI AI ---
+# Kita pakai try-except agar jika API bermasalah, aplikasi tidak langsung mati
 try:
-    # Mengambil API Key dari Secrets Streamlit
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-    
-    # Menanamkan Knowledge Psikologi & Kimia
-    SYSTEM_INSTRUCTION = """
-    Identitas: Anda adalah 'Bunda AI', asisten pribadi yang hangat dan cerdas.
-    Keahlian: Psikologi Parenting (Positive Discipline) dan Edukasi Kimia Dasar.
-    Gaya Bahasa: Gunakan panggilan 'Bunda/Ayah'. Awali dengan validasi empati. 
-    Contoh: "Bunda, saya mengerti itu melelahkan..."
-    Tujuan: Mengubah emosi menjadi edukasi dan komunikasi positif.
-    """
-    
-# --- KONEKSI API ---
-try:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-    
-    # Cek apakah model tersedia (untuk debugging)
-    available_models = [m.name for m in genai.list_models()]
-    # st.write(available_models) # Hapus tanda pagar di awal jika ingin melihat daftar model yang aktif di layar
+    if "GOOGLE_API_KEY" in st.secrets:
+        api_key = st.secrets["GOOGLE_API_KEY"]
+        genai.configure(api_key=api_key)
+    else:
+        st.error("❌ API Key belum diatur di Streamlit Secrets!")
+        st.stop()
 except Exception as e:
-    st.error(f"Waduh Bunda, ada masalah di API Key: {e}")
+    st.error(f"Terjadi kesalahan konfigurasi: {e}")
+    st.stop()
 
-# Pakai nama model yang paling standar
-model = genai.GenerativeModel('models/gemini-1.5-flash') 
-# Perhatikan tambahan 'models/' di atas, terkadang library versi tertentu mewajibkan ini.
+# Menanamkan Pengetahuan Psikologi & Kimia langsung di System Instruction
+KNOWLEDGE_BASE = """
+IDENTITAS: Anda adalah 'Bunda AI', asisten pribadi yang hangat dan sabar untuk orang tua. 
+KUALIFIKASI: Anda ahli dalam Psikologi Parenting (Positive Discipline) dan Dosen Pendidikan Kimia.
 
-# --- 4. UI APLIKASI ---
+ATURAN KOMUNIKASI:
+1. Validasi Emosi: Selalu mulai dengan empati (Contoh: "Bunda mengerti, itu memang melelahkan...").
+2. Transformasi Positif: Ubah larangan jadi ajakan. Ganti "Jangan" dengan "Ayo" atau "Boleh setelah...".
+3. Sentuhan Sains: Setiap kali memberikan saran aktivitas, hubungkan dengan ilmu kimia sederhana yang ada di rumah (misal: polimer tepung, reaksi cuka, kristalisasi gula).
+
+GAYA BAHASA: Sopan, hangat, keibuan, tapi cerdas. Panggil pengguna dengan 'Bunda' atau 'Ayah'.
+"""
+
+# Menggunakan model yang paling stabil
+try:
+    model = genai.GenerativeModel(
+        model_name='gemini-1.5-flash',
+        system_instruction=KNOWLEDGE_BASE
+    )
+except Exception as e:
+    st.error(f"Gagal memuat model AI: {e}")
+    st.stop()
+
+# --- 4. TAMPILAN ANTARMUKA (UI) ---
 st.title("🌸 Bunda AI")
-st.subheader("Teman Cerdas untuk Pengasuhan Penuh Kasih")
+st.markdown("<p style='text-align: center; color: #888;'>Asisten Cerdas untuk Pengasuhan Penuh Kasih</p>", unsafe_allow_html=True)
 
-tabs = st.tabs(["✨ Anti-Bentak", "🧪 Ide Main Sains", "📝 Cek Mood Bunda"])
+# Membuat Menu Tab
+tabs = st.tabs(["✨ Anti-Bentak", "🧪 Main Sains", "📝 Ruang Curhat"])
 
 # --- TAB 1: ANTI-BENTAK ---
 with tabs[0]:
-    st.write("### Ubah Marah Jadi Kata Indah")
-    raw_text = st.text_input("Apa yang ingin Bunda sampaikan ke si Kecil?", placeholder="Contoh: Jangan lari-lari nanti jatuh!", key="input1")
-    if st.button("Ubah Kalimat ✨"):
+    st.write("### 💬 Ubah Kata-kata")
+    st.write("Tulis apa yang ingin Bunda ucapkan, AI akan mengubahnya menjadi lebih lembut.")
+    raw_text = st.text_input("Kalimat Bunda:", placeholder="Contoh: Adek jangan lari-lari nanti jatuh!")
+    
+    if st.button("Ubah Menjadi Positif ✨"):
         if raw_text:
-            with st.spinner('Berpikir...'):
-                res = model.generate_content(f"Ubah kalimat ini agar positif & edukatif: {raw_text}")
-                st.success(res.text)
+            with st.spinner('Berpikir sejenak...'):
+                try:
+                    prompt = f"Ubah kalimat ini sesuai prinsip Positive Discipline: '{raw_text}'"
+                    response = model.generate_content(prompt)
+                    st.success("**Saran Bunda AI:**")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"Aduh, ada gangguan teknis: {e}")
         else:
-            st.warning("Tuliskan sesuatu dulu ya, Bunda.")
+            st.warning("Tuliskan kalimatnya dulu ya, Bunda.")
 
-# --- TAB 2: IDE MAIN SAINS ---
+# --- TAB 2: MAIN SAINS ---
 with tabs[1]:
-    st.write("### Main Sambil Belajar Kimia")
-    kondisi = st.text_input("Bagaimana suasana hati si Kecil?", placeholder="Contoh: Lagi bosan/sedih/hiperaktif", key="input2")
-    if st.button("Cari Ide Main 🧪"):
+    st.write("### 🧪 Ide Bermain Edukatif")
+    st.write("Dapatkan ide sensory play kimia sederhana berdasarkan mood anak.")
+    kondisi = st.text_input("Suasana hati si Kecil saat ini?", placeholder="Contoh: Sedang tantrum / bosan / hiperaktif")
+    
+    if st.button("Dapatkan Inspirasi Main 🎨"):
         if kondisi:
             with st.spinner('Mencari ide seru...'):
-                res = model.generate_content(f"Berikan 1 aktivitas sensory play kimia sederhana untuk anak yang sedang {kondisi}")
-                st.info(res.text)
+                try:
+                    prompt = f"Berikan 1 ide aktivitas sensory play berbasis kimia sederhana untuk anak yang sedang {kondisi}."
+                    response = model.generate_content(prompt)
+                    st.info("**Coba aktivitas ini yuk, Bunda:**")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"Aplikasi sedang lelah, coba lagi ya: {e}")
         else:
-            st.warning("Ceritakan kondisi si Kecil dulu ya, Bunda.")
+            st.warning("Ceritakan sedikit kondisi si Kecil dulu ya.")
 
-# --- TAB 3: CEK MOOD ---
+# --- TAB 3: RUANG CURHAT ---
 with tabs[2]:
-    st.write("### Ruang Curhat Bunda")
-    jurnal = st.text_area("Ceritakan harimu di sini...", placeholder="Hari ini aku merasa...", key="input3")
-    if st.button("Analisis Mood 📝"):
+    st.write("### 📝 Jurnal Bunda")
+    st.write("Keluarkan unek-unek Bunda hari ini. Kami akan menjaga rahasianya.")
+    jurnal = st.text_area("Bagaimana perasaan Bunda hari ini?", placeholder="Hari ini sangat melelahkan karena...")
+    
+    if st.button("Analisis Mood Bunda ❤️"):
         if jurnal:
             with st.spinner('Mendengarkan curhatan Bunda...'):
-                res = model.generate_content(f"Analisis jurnal ini, berikan semangat dan tips self-care singkat: {jurnal}")
-                st.warning(res.text)
-                st.write("---")
-                st.caption("Jika Bunda butuh bantuan ahli, klik tombol di bawah:")
-                st.link_button("Chat Psikolog Rekanan", "https://wa.me/628XXXXXXXX")
+                try:
+                    prompt = f"Analisis jurnal ini, berikan dukungan moral dan tips self-care singkat: '{jurnal}'"
+                    response = model.generate_content(prompt)
+                    st.warning("**Pesan untuk Bunda:**")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"Maaf, AI gagal menganalisis: {e}")
+            
+            st.divider()
+            st.markdown("---")
+            st.write("🆘 **Butuh bantuan profesional?**")
+            st.link_button("Chat Psikolog Rekanan (WhatsApp)", "https://wa.me/628123456789")
         else:
             st.warning("Tuliskan curhatan Bunda dulu ya.")
+
+st.markdown("<br><hr><center><small>Powered by Gemini AI | Created by Your Coach</small></center>", unsafe_allow_html=True)
