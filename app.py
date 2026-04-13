@@ -43,9 +43,41 @@ Pengetahuan Inti:
 Bahasa: Gunakan panggilan 'Bunda/Ayah' agar terasa lebih dekat.
 """
 
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    system_instruction=SYSTEM_INSTRUCTION
+import streamlit as st
+import google.generativeai as genai
+
+# --- KONFIGURASI HALAMAN ---
+st.set_page_config(
+    page_title="SmartParenting AI",
+    page_icon="🌸",
+    layout="centered"
+)
+
+# --- STYLE CSS (Diperbaiki agar tidak error) ---
+st.markdown("""
+    <style>
+    .main { background-color: #fff5f7; }
+    .stButton>button {
+        background-color: #ff85a2;
+        color: white;
+        border-radius: 20px;
+        border: none;
+        padding: 10px 25px;
+    }
+    h1 { color: #d63384; font-family: 'sans-serif'; }
+    </style>
+    """, unsafe_allow_html=True) # Pakai html=True
+
+# --- KONEKSI API ---
+try:
+    # Pastikan di Secrets Streamlit namanya "GOOGLE_API_KEY"
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+except Exception as e:
+    st.error(f"Masalah API Key: {e}")
+
+# Inisialisasi Model yang lebih aman
+model = genai.GenerativeModel('gemini-1.5-flash')
 )
 
 # --- UI APLIKASI ---
