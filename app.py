@@ -41,12 +41,20 @@ try:
     Tujuan: Mengubah emosi menjadi edukasi dan komunikasi positif.
     """
     
-    model = genai.GenerativeModel(
-        model_name='gemini-1.5-flash',
-        system_instruction=SYSTEM_INSTRUCTION
-    )
+# --- KONEKSI API ---
+try:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+    
+    # Cek apakah model tersedia (untuk debugging)
+    available_models = [m.name for m in genai.list_models()]
+    # st.write(available_models) # Hapus tanda pagar di awal jika ingin melihat daftar model yang aktif di layar
 except Exception as e:
-    st.error(f"⚠️ Masalah API Key: Pastikan GOOGLE_API_KEY sudah ada di Secrets Streamlit. Error: {e}")
+    st.error(f"Waduh Bunda, ada masalah di API Key: {e}")
+
+# Pakai nama model yang paling standar
+model = genai.GenerativeModel('models/gemini-1.5-flash') 
+# Perhatikan tambahan 'models/' di atas, terkadang library versi tertentu mewajibkan ini.
 
 # --- 4. UI APLIKASI ---
 st.title("🌸 Bunda AI")
