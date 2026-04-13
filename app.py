@@ -23,7 +23,7 @@ st.markdown("""
     .stTextInput>div>div>input { border-radius: 15px; }
     h1 { color: #d63384; font-family: 'Comic Sans MS', cursive; }
     </style>
-    """, unsafe_allow_supported_types=True)
+    """, unsafe_allow_html=True) # 
 
 # --- KONEKSI API ---
 # Mengambil API Key dari Secret Streamlit (Lebih Aman)
