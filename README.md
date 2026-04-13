@@ -7,11 +7,11 @@ Aplikasi asisten pengasuhan cerdas yang menggabungkan kekuatan **Generative AI (
 - **🎨 Katalis Aktivitas:** Ide bermain sensory play berbasis sains untuk regulasi emosi anak.
 - **📖 Jurnal Burnout:** Deteksi dini kelelahan mental orang tua dengan analisis sentimen.
 
-## 🧪 Tech Stack
+
 - **Framework:** Streamlit (UI ramah pengguna)
 - **Engine:** Google Gemini 1.5 Flash API
 - **Language:** Python
-- **Knowledge Source:** Modul Psikologi Parenting & Kimia Terapan
+- **Knowledge Source:** Modul Psikologi Parenting 
 
 ## 👩‍🏫 Author
 Dikembangkan oleh **Dosen Pendidikan Kimia & Digital Marketing Expert**, berkolaborasi dengan tenaga profesional Psikologi.
